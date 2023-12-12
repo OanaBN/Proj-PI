@@ -20,25 +20,27 @@ import javax.swing.Timer;
 public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements ActionListener/*preia inputul jucatorului*/ {
 	
 	Timer mainTimer;
-	Jucator jucator;
-	Goal goal;
+	static Jucator jucator;
+	static Goal goal;
 	private boolean paused = false;
-	private PausedMenu pauseMenu = new PausedMenu();
-	
     int nrInamici = 5;
+    int nrInamici2;
     int nrPlat = 6;
+    int boss = 1;
     public static int nivel = 1;
 	
 	static ArrayList<Inamic> inamici = new ArrayList<Inamic>();
+	static ArrayList<InamicBoss> inamicB = new ArrayList<InamicBoss>();
+	static ArrayList<InamicTip2> inamici2 = new ArrayList<InamicTip2>();
 	static ArrayList<Magie> magii = new ArrayList<Magie>();
-	static ArrayList<Platforma> platforme = new ArrayList<Platforma>();
-	Random r = new Random();
+	static ArrayList<Proiectil> proi = new ArrayList<Proiectil>();
+	static ArrayList<Platforma> platforme = new ArrayList<Platforma>();	
+	static Random r = new Random();
 	
 	public EcranJoc() {
 		setFocusable(true);
-		jucator = new Jucator(/*100, "Maylina",*/ 100, 100);
-		//Graphics2D g2d = (Graphics2D) g;
-		goal = new Goal(1400, 500);
+		jucator = new Jucator(100, 800);
+		goal = new Goal(1350, 550);
 		addKeyListener(new KeyAdapt(jucator));
 		mainTimer = new Timer (10, this); /*odata ce timer ul se opreste, va apela actionPerformed*/
 		mainTimer.start();
@@ -52,26 +54,12 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
             }
         });
 		
-
-        /*platforme.add(platform1);
-        platforme.add(platform2);
-        platforme.add(platform3);*/
-		
 		incepJoc();
-		
-		/*for(int  i = 0; i < nrInamici; i++) {
-			addInamic(new Inamic(r.nextInt(800), r.nextInt(600)));
-		}*/
-		
 	}
 	
 	public void paint(Graphics g){//functie pentru imaginea jocului
 		super.paint(g);
-		Graphics2D g2d = (Graphics2D) g;
-		if(paused) {
-	        pauseMenu.draw(g2d);
-			}
-		else {
+		Graphics2D g2d = (Graphics2D) g; {
 		if(nivel == 1) {
 		ImageIcon ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\Assets\\backlvl1.png");
 		g2d.drawImage(ic.getImage(),0,0,null);}
@@ -100,9 +88,22 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 			tempInamic.draw(g2d);
 		}
 		
+		for(int i = 0; i< inamici2.size();i++) {
+			InamicTip2 tempInamic = inamici2.get(i);
+			tempInamic.draw(g2d);
+		}
+		for(int i = 0; i< inamicB.size();i++) {
+			InamicBoss tempInamic = inamicB.get(i);
+			tempInamic.draw(g2d);
+		}
+		
 		for (int i = 0; i < magii.size(); i++) {
 			Magie m = magii.get(i);
 			m.draw(g2d);
+		}
+		for (int i = 0; i < proi.size(); i++) {
+			Proiectil p = proi.get(i);
+			p.draw(g2d);
 		}
 		
 		for (int i = 0; i < platforme.size(); i++) {
@@ -116,10 +117,6 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 		drawInstructionsMagieTipScut(g2d);
 		}
 	}
-		/*ImageIcon ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\poze shocate de la Alexia\\le gromp.png");
-		Image img = ic.getImage();
-		
-		g2d.drawImage(img, 0, 0, null);*/
 	
 	private void drawPausedBar(Graphics2D g2d) {
         g2d.setColor(Color.WHITE);
@@ -150,31 +147,49 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
         g2d.setFont(new Font("Arial", Font.PLAIN, 20));
         g2d.drawString("Spared: " + Inamic.getSpared(), 1380, 20);
     }
-	
+	/*private int spared() {
+		if (checkGoalCollision() == 1) {
+			int nr = inamici.size() + inamici2.size() + inamicB.size();
+		return nr;}
+		return 0;
+		
+	}*/
 	public void incepJoc()
-	{
+	{   
 		nrInamici= nivel * 3;
+		nrInamici2= nivel * 2;
 		jucator.x = 0;
+		
+		if (nivel == 4 || nivel == 5) {
+	        // Spawn the boss enemy on the 4th and 5th levels
+	        InamicBoss boss = new InamicBoss(1000,400);
+	        inamicB.add(boss);
+	    }
 		
 		for(int i = 0; i < nrInamici; i++) {
 			addInamic(new Inamic(r.nextInt(1400,1500), r.nextInt(800)));
-			//assignRandomPlatform(Inamic);
 		}
+
+		 //addInamicBoss(new InamicBoss(1000, 400)); // Adjust the coordinates accordingly
 		 
 		
 		
 		for(int j = 0; j < nrPlat; j++) {
 			addPlatforma(new Platforma(r.nextInt(1400), r.nextInt(300,500)));
 			addPlatforma(new Platforma(r.nextInt(1400), r.nextInt(100,200)));
+			addInamic2(new InamicTip2(r.nextInt(1400), r.nextInt(100, 500)));
 		}
 	}
 	
 	public void terminJoc() {
-		if (inamici.size()==0 || checkGoalCollision() == 1) {
+		if (inamici.size()==0 && inamici2.size() == 0 && inamicB.size() == 0|| checkGoalCollision() == 1) {
 			nivel ++;
 			inamici.clear();
+			inamici2.clear();
 			magii.clear();
 			platforme.clear();
+			proi.clear();
+			if (checkGoalCollision() == 1)
 			JOptionPane.showMessageDialog(null,"Ai castigat nivelul" + (nivel - 1));
 			if (nivel > 5) {
 				JOptionPane.showMessageDialog(null, "Felicitari!! \n" + "Ai castigat jocul!");
@@ -184,17 +199,33 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 		}
 	}
 	
-	private int checkGoalCollision() {
+	public static int checkGoalCollision() {
         if (jucator.getBounds().intersects(goal.getBounds())) {
+        	//Inamic.getSpared();
         	return 1;
         }
         return 0;
     }
+	private static void assignPlatform(InamicTip2 inamicTip2) {
+        ArrayList<Platforma> availablePlatforms = new ArrayList<>(platforme);
+        if (!availablePlatforms.isEmpty()) {
+            Platforma randomPlatform = availablePlatforms.get(r.nextInt(availablePlatforms.size()));
+            inamicTip2.setX(randomPlatform.getX() + randomPlatform.getPlatformaImg().getWidth(null) / 2);
+            inamicTip2.setY(randomPlatform.getY() - inamicTip2.getInamicImg().getHeight(null));
+            inamicTip2.setPlatform(randomPlatform);
+        }
+    }
+	public void updateProjectiles() {
+        for (int i = 0; i < proi.size(); i++) {
+            Proiectil projectile = proi.get(i);
+            projectile.update();
+        }
+    }
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
 		jucator.update();
+		updateProjectiles();
 		
 		 if (!paused) {
 		        jucator.update();
@@ -204,11 +235,19 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 			                                     //miste in dreapta/stanga pana dau de un perete
 			Inamic tempInamic = inamici.get(i);
 			tempInamic.update();
-			
-			 /*if (tempInamic.getX() > jucator.getX() && tempInamic.getX() > 1300 ) {
-		            removeInamic(tempInamic);
-			 }*/
 		}
+		
+		for(int i = 0; i < inamici2.size(); i++) {
+      
+            InamicTip2 tempInamic = inamici2.get(i);
+            tempInamic.update();
+        }
+		
+		for(int i = 0; i < inamicB.size(); i++) {
+		      
+            InamicBoss tempInamic = inamicB.get(i);
+            tempInamic.update();
+        }
 		for (int i = 0; i < magii.size(); i++) {
 			Magie m = magii.get(i);
 			m.update();
@@ -223,13 +262,8 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 		repaint();
 		 }
 	}
-	private void assignRandomPlatform(Inamic inamic) {
-        ArrayList<Platforma> availablePlatforms = new ArrayList<>(platforme);
-        if (!availablePlatforms.isEmpty()) {
-            Platforma randomPlatform = availablePlatforms.get(r.nextInt(availablePlatforms.size()));
-            inamic.setPlatform(randomPlatform);
-        }
-    }
+	
+	
 	public void setPaused(boolean paused) {
         this.paused = paused;
     }
@@ -237,9 +271,23 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 	public static void addInamic(Inamic i) {
 		inamici.add(i);
 	}
+	public static void addInamic2(InamicTip2 i) {
+		inamici2.add(i);
+	}
+	public static void addInamicBoss(InamicBoss ib) {
+		inamicB.add(ib);
+	}
 	
 	public static void removeInamic(Inamic i) {
 		inamici.remove(i);
+	}
+	public static void removeInamic(InamicTip2 i2) {
+		inamici2.remove(i2);
+		
+	}
+	public static void removeInamic(InamicBoss iB) {
+		inamicB.remove(iB);
+		
 	}
 	
 	public static void addMagie(Magie m) {
@@ -248,6 +296,13 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 	
 	public static void removeMagie(Magie m) {
 		magii.remove(m);
+	}
+	public static void addProiectil(Proiectil pro) {
+		proi.add(pro);
+	}
+	public static void removeProiectil(Proiectil pro) {
+		proi.remove(pro);
+		
 	}
 	
 	public static void addPlatforma(Platforma p) {
@@ -262,6 +317,15 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 	public static ArrayList<Inamic> getInamicList(){
 		return inamici;
 	}
+	public static ArrayList<InamicTip2> getInamic2List(){
+		return inamici2;
+	}
+	public static ArrayList<InamicBoss> getInamicBossList(){
+		return inamicB;
+	}
+	public static ArrayList<Proiectil> getProiectilList(){
+		return proi;
+	}
 	
 	public static ArrayList<Platforma> getPlatformaList(){
 		return platforme;
@@ -270,5 +334,4 @@ public class EcranJoc extends JPanel/*EcranJoc se afla in Jframe*/ implements Ac
 	public void quitGame() { 
 	  System.exit(0);
 	}
-	
 }

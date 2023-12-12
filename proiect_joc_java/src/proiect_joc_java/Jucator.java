@@ -16,7 +16,8 @@ public class Jucator extends Entitate {
 	int gravity = 1;
 	boolean isJumping = false;
 	boolean isJumpKeyHeld = false;
-    int jumpStrength = 30;
+	boolean onPlatform = true;
+    int jumpStrength = 25;
     int jumpHeight = 0;
     int maxJumpHeight = 100;
     private boolean hasShield = false;
@@ -44,7 +45,8 @@ public class Jucator extends Entitate {
 		 if (!hasShield) {
 	            checkCollisions();
 	        }
-		 checkPlatformaCollisions();
+		 if (onPlatform == true) {
+		 checkPlatformaCollisions();}
 		
 		if (y >= 600) {
             y = 600;
@@ -81,7 +83,7 @@ public class Jucator extends Entitate {
 		 if (key == KeyEvent.VK_W) {
 	            jump();
 		}else if (key == KeyEvent.VK_S) {
-			velY = speed;
+			onPlatform = false;
 		}else if (key == KeyEvent.VK_A) {
 			velX = -speed;
 		}else if (key == KeyEvent.VK_D) {
@@ -93,6 +95,7 @@ public class Jucator extends Entitate {
 		}
 	}
 	 //Lasare
+	
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode(); 
         
@@ -101,7 +104,7 @@ public class Jucator extends Entitate {
              isJumpKeyHeld = false; 
              //jumpHeight = 0;
 		}else if (key == KeyEvent.VK_S) {
-			velY = 0;
+			onPlatform = true;
 		}else if (key == KeyEvent.VK_A) {
 			velX = 0;
 		}else if (key == KeyEvent.VK_D) {
@@ -114,6 +117,9 @@ public class Jucator extends Entitate {
     
     public void checkCollisions() {
     	ArrayList<Inamic> inamici =EcranJoc.getInamicList();
+    	ArrayList<InamicTip2> inamici2 =EcranJoc.getInamic2List();
+    	ArrayList<InamicBoss> inamicB =EcranJoc.getInamicBossList();
+    	ArrayList<Proiectil> proiectile = EcranJoc.getProiectilList();
     	
     	for( int i = 0; i < inamici.size(); i++) {
     	  Inamic tempInamic = inamici.get(i);
@@ -121,8 +127,34 @@ public class Jucator extends Entitate {
     			JOptionPane.showMessageDialog(null, "Ai fost ucis :( " + "Nivelul--> " + EcranJoc.nivel);
     	        //EcranJoc.disparitieInamic(tempInamic);//daca jucatorul atinge inamicul, inamicul dispare 
     			System.exit(0);//daca jucatorul atinge inamicii, pierde o viata/moare
+    			
     		}
     	}
+    	for( int i = 0; i < inamici2.size(); i++) {
+      	  InamicTip2 tempInamic = inamici2.get(i);
+      		if(getBounds().intersects(inamici2.get(i).getBounds()) && !hasShield) { 
+      			JOptionPane.showMessageDialog(null, "Ai fost ucis :( " + "Nivelul--> " + EcranJoc.nivel);
+      	        //EcranJoc.disparitieInamic(tempInamic);//daca jucatorul atinge inamicul, inamicul dispare 
+      			System.exit(0);//daca jucatorul atinge inamicii, pierde o viata/moare
+      		}
+    	}
+    	for( int i = 0; i < inamicB.size(); i++) {
+        	  InamicBoss tempInamic = inamicB.get(i);
+        		if(getBounds().intersects(inamicB.get(i).getBounds()) && !hasShield) { 
+        			JOptionPane.showMessageDialog(null, "Ai fost ucis :( " + "Nivelul--> " + EcranJoc.nivel);
+        	        //EcranJoc.disparitieInamic(tempInamic);//daca jucatorul atinge inamicul, inamicul dispare 
+        			System.exit(0);//daca jucatorul atinge inamicii, pierde o viata/moare
+        		}
+      	}
+    	for( int i = 0; i < proiectile.size(); i++) {
+      	  Proiectil tempPro = proiectile.get(i);
+      		if(getBounds().intersects(proiectile.get(i).getBounds()) && !hasShield) { 
+      			JOptionPane.showMessageDialog(null, "Ai fost ucis :( " + "Nivelul--> " + EcranJoc.nivel);
+      	        //EcranJoc.disparitieInamic(tempInamic);//daca jucatorul atinge inamicul, inamicul dispare 
+      			System.exit(0);//daca jucatorul atinge inamicii, pierde o viata/moare
+      			
+      		}
+      	}
     }
     
     public void checkPlatformaCollisions() {
@@ -130,8 +162,8 @@ public class Jucator extends Entitate {
     	
     	for( int i = 0; i < platforme.size(); i++) {
     	  Platforma tempPlat = platforme.get(i);
-    		if(getBounds().intersects(platforme.get(i).getBounds())) { 
-    			y = tempPlat.getY() - getJucatorImg().getHeight(null);
+    		if(getBoundsFeet().intersects(platforme.get(i).getBounds())) { 
+    			y = tempPlat.getY() - (getJucatorImg().getHeight(null));
                 velY = 0;
                 isJumping = false;
                 jumpHeight = 0;
@@ -140,6 +172,10 @@ public class Jucator extends Entitate {
     }
     public Rectangle getBounds() {
     	return new Rectangle(x,y,getJucatorImg().getWidth(null),getJucatorImg().getHeight(null));
+    }
+    
+    public Rectangle getBoundsFeet() {
+    	return new Rectangle(x,y+getJucatorImg().getHeight(null)+1,getJucatorImg().getWidth(null),1);
     }
     
     
@@ -159,15 +195,19 @@ public class Jucator extends Entitate {
         hasShield = false;
     }
     
-	public static int getX() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getX() {
+		return x;
 	}
 	
-	public static int getY() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getY() {
+		return y;
 	}
-
-
+	public void setX(int i) {
+		this.x = x;
+		
+	}
+	public void setY(int i) {
+		this.y = y;
+		
+	}
 }

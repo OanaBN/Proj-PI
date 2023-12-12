@@ -39,12 +39,10 @@ public class Inamic extends Entitate {
             velY = 0;
         }
 		checkCollisions();
-		 if (x < -100) {
-	            // Remove the enemy from the list
+		 if (x < -100 || EcranJoc.checkGoalCollision() == 1) {
 	            EcranJoc.removeInamic(this);
 	            spared++;
 		 }
-		//checkOffScreen();
 	}
 	
 	public void draw(Graphics2D g2d) {
@@ -53,7 +51,26 @@ public class Inamic extends Entitate {
 	}
 	
 	public Image getInamicImg() {
-		ImageIcon ic = new ImageIcon("D:/Shimejii/shimejiee/img/Priest/shime1.png");
+		ImageIcon ic;
+		switch (EcranJoc.nivel) {
+        case 1:
+            ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\Assets\\enemy1.png");
+            break;
+        case 2:
+            ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\Assets\\enemy2.png");
+            break;
+        case 3:
+            ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\Assets\\enemy3.png");
+            break;
+        case 4:
+            ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\Assets\\enemy4.png");
+            break;
+        case 5:
+            ic = new ImageIcon("C:\\Users\\Legion\\Desktop\\Homework\\Assets\\enemy5.png");
+            break;
+        default:
+            ic = new ImageIcon("C:/Users/Legion/Desktop/Homework/Assets/imp.png");
+    }
 		return ic.getImage();
 	}
 	
@@ -71,6 +88,9 @@ public class Inamic extends Entitate {
 			 }
 		 }
 	 }
+	 public int getHeight() {
+	       return getInamicImg().getHeight(null);
+	    }
 	 //adaugare point sistem
 
 	public int getX() {
@@ -80,6 +100,14 @@ public class Inamic extends Entitate {
 	
 	public static int getSpared() {
 		return spared;
+	}
+	public void setX(int i) {
+		this.x = x;
+		
+	}
+	public void setY(int i) {
+		this.y = y;
+		
 	}
 	 
 }
